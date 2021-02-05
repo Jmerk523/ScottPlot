@@ -190,8 +190,8 @@ namespace ScottPlot
         {
             if (array == null)
             {
-                // Or we could ignore this and use a 0-length data set
-                throw new ArgumentNullException(nameof(array));
+                // Just return an empty set of plot data, which allows passing parameter 'null' without exception
+                return default;
             }
             return new PlotData<T>(array);
         }
