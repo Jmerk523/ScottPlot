@@ -10,7 +10,7 @@ namespace ScottPlot.Drawing
         /// <summary>
         /// Return Xs and Ys for 2 polygons representing the input data above and below the given baseline
         /// </summary>
-        public static (double[] xs, double[] ysAbove, double[] ysBelow) PolyAboveAndBelow(double[] xs, double[] ys, double baseline)
+        public static (double[] xs, double[] ysAbove, double[] ysBelow) PolyAboveAndBelow(ReadOnlySpan<double> xs, ReadOnlySpan<double> ys, double baseline)
         {
             if (xs.Length != ys.Length)
                 throw new ArgumentException("xs and ys must have same length");
@@ -44,7 +44,7 @@ namespace ScottPlot.Drawing
             List<double> polyXs = new List<double>();
             List<double> polyYs = new List<double>();
 
-            polyXs.Add(xs.First());
+            polyXs.Add(xs[0]);
             polyYs.Add(baseline);
 
             for (int i = 0; i < xs.Length; i++)
@@ -59,7 +59,7 @@ namespace ScottPlot.Drawing
                 }
             }
 
-            polyXs.Add(xs.Last());
+            polyXs.Add(xs[xs.Length - 1]);
             polyYs.Add(baseline);
 
             double[] xs2 = polyXs.ToArray();

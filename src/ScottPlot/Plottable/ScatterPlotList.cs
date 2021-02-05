@@ -66,11 +66,19 @@ namespace ScottPlot.Plottable
         /// </summary>
         public void AddRange(double[] xs, double[] ys)
         {
+            AddRange((IList<double>)xs, (IList<double>)ys);
+        }
+
+        /// <summary>
+        /// Add multiple points to the list
+        /// </summary>
+        public void AddRange(IList<double> xs, IList<double> ys)
+        {
             if (xs is null)
                 throw new ArgumentException("xs must not be null");
             if (ys is null)
                 throw new ArgumentException("ys must not be null");
-            if (xs.Length != ys.Length)
+            if (xs.Count != ys.Count)
                 throw new ArgumentException("xs and ys must have the same length");
 
             Xs.AddRange(xs);

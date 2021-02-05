@@ -41,8 +41,7 @@ namespace ScottPlot.Plottable
 
         public AxisLimits GetAxisLimits()
         {
-            // TODO: dont use an array here
-            double[] limits = new double[4];
+            Span<double> limits = stackalloc double[4];
             limits[0] = OHLCs[0].time;
             limits[1] = OHLCs[0].time;
             limits[2] = OHLCs[0].low;

@@ -136,7 +136,7 @@ namespace ScottPlot
             return positions;
         }
 
-        private static double[] DoubleArray<T>(T[] dataIn)
+        private static double[] DoubleArray<T>(ReadOnlySpan<T> dataIn)
         {
             double[] dataOut = new double[dataIn.Length];
             for (int i = 0; i < dataIn.Length; i++)
@@ -144,22 +144,22 @@ namespace ScottPlot
             return dataOut;
         }
 
-        public static double[] DoubleArray(byte[] dataIn)
+        public static double[] DoubleArray(ReadOnlySpan<byte> dataIn)
         {
             return DoubleArray<byte>(dataIn);
         }
 
-        public static double[] DoubleArray(int[] dataIn)
+        public static double[] DoubleArray(ReadOnlySpan<int> dataIn)
         {
             return DoubleArray<int>(dataIn);
         }
 
-        public static double[] DoubleArray(float[] dataIn)
+        public static double[] DoubleArray(ReadOnlySpan<float> dataIn)
         {
             return DoubleArray<float>(dataIn);
         }
 
-        public static void ApplyBaselineSubtraction(double[] data, int index1, int index2)
+        public static void ApplyBaselineSubtraction(Span<double> data, int index1, int index2)
         {
             double baselineSum = 0;
             for (int i = index1; i < index2; i++)
@@ -169,7 +169,7 @@ namespace ScottPlot
                 data[i] -= baselineAverage;
         }
 
-        public static double[] Log10(double[] dataIn)
+        public static double[] Log10(ReadOnlySpan<double> dataIn)
         {
             double[] dataOut = new double[dataIn.Length];
             for (int i = 0; i < dataOut.Length; i++)
@@ -177,7 +177,7 @@ namespace ScottPlot
             return dataOut;
         }
 
-        public static (double[] xs, double[] ys) ConvertPolarCoordinates(double[] rs, double[] thetas)
+        public static (double[] xs, double[] ys) ConvertPolarCoordinates(ReadOnlySpan<double> rs, ReadOnlySpan<double> thetas)
         {
             double[] xs = new double[rs.Length];
             double[] ys = new double[rs.Length];
@@ -215,7 +215,7 @@ namespace ScottPlot
             }
         }
 
-        public static double[] Round(double[] data, int decimals = 2)
+        public static double[] Round(Span<double> data, int decimals = 2)
         {
             double[] rounded = new double[data.Length];
             for (int i = 0; i < data.Length; i++)
@@ -226,11 +226,11 @@ namespace ScottPlot
         /// <summary>
         /// return a copy of the given array padded with the given value at both sidees
         /// </summary>
-        public static double[] Pad(double[] values, int padCount = 1, double padWithLeft = 0, double padWithRight = 0, bool cloneEdges = false)
+        public static double[] Pad(ReadOnlySpan<double> values, int padCount = 1, double padWithLeft = 0, double padWithRight = 0, bool cloneEdges = false)
         {
             double[] padded = new double[values.Length + padCount * 2];
 
-            Array.Copy(values, 0, padded, padCount, values.Length);
+            values.CopyTo(padded.AsSpan(padCount, values.Length));
 
             if (cloneEdges)
             {
@@ -273,7 +273,7 @@ namespace ScottPlot
             return hash;
         }
 
-        public static double[,] XYToIntensities(IntensityMode mode, int[] xs, int[] ys, int width, int height, int sampleWidth)
+        public static double[,] XYToIntensities(IntensityMode mode, IList<int> xs, IList<int> ys, int width, int height, int sampleWidth)
         {
             double NormPDF(double x, double mu, double sigma)
             {
@@ -285,7 +285,7 @@ namespace ScottPlot
             {
                 double[,] intermediate = new double[height, width];
                 int radius = 2; // 2 Standard deviations is ~0.95, i.e. close enough
-                for (int i = 0; i < xs.Length; i++)
+                for (int i = 0; i < xs.Count; i++)
                 {
                     if (xs[i] >= 0 && xs[i] < width && ys[i] >= 0 && ys[i] < height)
                     {
@@ -355,7 +355,7 @@ namespace ScottPlot
                                 int index = Array.BinarySearch(xs_sorted, j + l);
                                 if (index > 0)
                                 {
-                                    for (int m = index; m < xs.Length; m++)
+                                    for (int m = index; m < xs.Count; m++)
                                     { //Multiple points w/ same x value
                                         if (points[m].x == j + l && points[m].y == i + k)
                                         {

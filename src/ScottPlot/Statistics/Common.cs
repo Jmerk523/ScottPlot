@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -13,7 +14,7 @@ namespace ScottPlot.Statistics
         /// <summary>
         /// Return the standard deviation of the given values
         /// </summary>
-        public static double StDev(double[] values)
+        public static double StDev(ReadOnlySpan<double> values)
         {
             double mean = Mean(values);
             double sumVariancesSquared = 0;
@@ -31,12 +32,12 @@ namespace ScottPlot.Statistics
         /// <summary>
         /// Return the standard error of the given values
         /// </summary>
-        public static double StdErr(double[] values) => StDev(values) / Math.Sqrt(values.Length);
+        public static double StdErr(ReadOnlySpan<double> values) => StDev(values) / Math.Sqrt(values.Length);
 
         /// <summary>
         /// Return the mean of the given values
         /// </summary>
-        public static double Mean(double[] values)
+        public static double Mean(ReadOnlySpan<double> values)
         {
             double sum = 0;
             for (int i = 0; i < values.Length; i++)
@@ -48,25 +49,24 @@ namespace ScottPlot.Statistics
         /// <summary>
         /// Return the Nth smallest value in the given array.
         /// </summary>
-        public static double NthOrderStatistic(double[] values, int n)
+        public static double NthOrderStatistic(ReadOnlySpan<double> values, int n)
         {
             if (n < 1 || n > values.Length)
                 throw new ArgumentException("n must be a number from 1 to the length of the array");
 
-            double[] valuesCopy = new double[values.Length];
-            Array.Copy(values, valuesCopy, values.Length);
+            double[] valuesCopy = values.ToArray();
             return QuickSelect(valuesCopy, 0, values.Length - 1, n - 1);
         }
 
         /// <summary>
         /// Return the value of the Nth quantile.
         /// </summary>
-        public static double Quantile(double[] values, int n, int quantileCount)
+        public static double Quantile(ReadOnlySpan<double> values, int n, int quantileCount)
         {
             if (n == 0)
-                return values.Min();
+                return Min(values);
             else if (n == quantileCount)
-                return values.Max();
+                return Max(values);
             else
                 return NthOrderStatistic(values, n * values.Length / quantileCount);
         }
@@ -91,24 +91,41 @@ namespace ScottPlot.Statistics
         /// </summary>
         /// <param name="values"></param>
         /// <param name="percentile">number from 0 to 100</param>
-        public static double Percentile(double[] values, double percentile)
+        public static double Percentile(ReadOnlySpan<double> values, double percentile)
         {
             if (percentile == 0)
-                return values.Min();
+                return Min(values);
             else if (percentile == 100)
-                return values.Max();
+                return Max(values);
             int percentileIndex = (int)(percentile / 100.0 * (values.Length - 1));
-
-            double[] copiedValues = new double[values.Length];
-            Array.Copy(values, copiedValues, values.Length);
             return NthOrderStatistic(values, percentileIndex + 1);
+        }
+
+        public static double Min(ReadOnlySpan<double> values)
+        {
+            double min = double.MaxValue;
+            for (int i = 0; i < values.Length; ++i)
+            {
+                min = Math.Min(min, values[i]);
+            }
+            return min;
+        }
+
+        public static double Max(ReadOnlySpan<double> values)
+        {
+            double max = double.MinValue;
+            for (int i = 0; i < values.Length; ++i)
+            {
+                max = Math.Max(max, values[i]);
+            }
+            return max;
         }
 
         /// <summary>
         /// Return the median of the given array.
         /// If the length of the array is even, this value is the mean of the upper and lower medians.
         /// </summary>
-        public static double Median(double[] values)
+        public static double Median(ReadOnlySpan<double> values)
         {
             if (values.Length % 2 == 1)
             {
@@ -131,7 +148,7 @@ namespace ScottPlot.Statistics
         /// <param name="rightIndex">inclusive upper bound</param>
         /// <param name="k">number starting at 0</param>
         /// <returns></returns>
-        private static double QuickSelect(double[] values, int leftIndex, int rightIndex, int k)
+        private static double QuickSelect(Span<double> values, int leftIndex, int rightIndex, int k)
         {
             /*
              * QuickSelect (aka Hoare's Algorithm) is a selection algorithm 
@@ -191,9 +208,11 @@ namespace ScottPlot.Statistics
         /// <returns></returns>
         public static int GetRandomInt(int min, int max)
         {
+            //Span<byte> randomBytes = stackalloc byte[sizeof(int)];
+            //Rand.GetBytes(randomBytes);
             byte[] randomBytes = new byte[sizeof(int)];
             Rand.GetBytes(randomBytes);
-            int randomInt = BitConverter.ToInt32(randomBytes, 0);
+            int randomInt = MemoryMarshal.Cast<byte, int>(randomBytes)[0];
             return Math.Abs(randomInt % (max - min + 1)) + min;
         }
 
@@ -204,7 +223,7 @@ namespace ScottPlot.Statistics
         /// <param name="leftIndex"></param>
         /// <param name="rightIndex"></param>
         /// <returns>index of the pivot used</returns>
-        private static int Partition(double[] values, int leftIndex, int rightIndex)
+        private static int Partition(Span<double> values, int leftIndex, int rightIndex)
         {
             // Moving the pivot to the end is far easier than handling it where it is
             // This also allows you to turn this into the non-randomized Partition

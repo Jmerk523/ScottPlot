@@ -57,16 +57,13 @@ namespace ScottPlot.Plottable
         /// </summary>
         /// <param name="fractions">from 0 (darkest) to 1 (brightest)</param>
         /// <param name="labels">strings displayed beside the ticks</param>
-        public void AddTicks(double[] fractions, string[] labels)
+        public void AddTicks(IList<double> fractions, IList<string> labels)
         {
-            if (fractions.Length != labels.Length)
+            if (fractions.Count != labels.Count)
                 throw new ArgumentException("fractions and labels must have the same length");
 
-            for (int i = 0; i < fractions.Length; i++)
-            {
-                TickFractions.Add(fractions[i]);
-                TickLabels.Add(labels[i]);
-            }
+            TickFractions.AddRange(fractions);
+            TickLabels.AddRange(labels);
         }
 
         /// <summary>
@@ -74,7 +71,7 @@ namespace ScottPlot.Plottable
         /// </summary>
         /// <param name="fractions">from 0 (darkest) to 1 (brightest)</param>
         /// <param name="labels">strings displayed beside the ticks</param>
-        public void SetTicks(double[] fractions, string[] labels)
+        public void SetTicks(IList<double> fractions, IList<string> labels)
         {
             ClearTicks();
             AddTicks(fractions, labels);
