@@ -149,6 +149,9 @@ namespace ScottPlot.Control
         private AxisLimits LimitsOnLastRender = new AxisLimits();
         private int PlottableCountOnLastRender = -1;
         private bool currentlyRendering = false;
+
+        public bool CurrentlyRendering => currentlyRendering;
+
         public void Render(bool lowQuality = false, bool skipIfCurrentlyRendering = false)
         {
             if (Bmp is null)
@@ -156,25 +159,31 @@ namespace ScottPlot.Control
 
             if (currentlyRendering && skipIfCurrentlyRendering)
                 return;
-            currentlyRendering = true;
 
-            //Debug.WriteLine("Render called by:" + new StackTrace().GetFrame(1).GetMethod().Name);
+            try
+            {
+                currentlyRendering = true;
+                //Debug.WriteLine("Render called by:" + new StackTrace().GetFrame(1).GetMethod().Name);
 
-            if (Configuration.Quality == QualityMode.High)
-                lowQuality = false;
-            else if (Configuration.Quality == QualityMode.Low)
-                lowQuality = true;
+                if (Configuration.Quality == QualityMode.High)
+                    lowQuality = false;
+                else if (Configuration.Quality == QualityMode.Low)
+                    lowQuality = true;
 
-            PlottableCountOnLastRender = Settings.Plottables.Count;
-            Plot.Render(Bmp, lowQuality);
+                PlottableCountOnLastRender = Settings.Plottables.Count;
+                Plot.Render(Bmp, lowQuality);
 
-            ScottPlot.AxisLimits newLimits = Plot.GetAxisLimits();
-            if (!newLimits.Equals(LimitsOnLastRender) && Configuration.AxesChangedEventEnabled)
-                AxesChanged(null, EventArgs.Empty);
-            LimitsOnLastRender = newLimits;
+                ScottPlot.AxisLimits newLimits = Plot.GetAxisLimits();
+                if (!newLimits.Equals(LimitsOnLastRender) && Configuration.AxesChangedEventEnabled)
+                    AxesChanged(null, EventArgs.Empty);
+                LimitsOnLastRender = newLimits;
 
-            BitmapUpdated(null, EventArgs.Empty);
-            currentlyRendering = false;
+                BitmapUpdated(null, EventArgs.Empty);
+            }
+            finally
+            {
+                currentlyRendering = false;
+            }
         }
 
         private void RenderAfterDragging() =>

@@ -49,22 +49,26 @@ namespace ScottPlot.Demo.WinForms.WinFormsDemos
         int nextValueIndex = -1;
         private void timerUpdateData_Tick(object sender, EventArgs e)
         {
-            double nextValue = ecg.GetVoltage(sw.Elapsed.TotalSeconds);
+            // vline is assigned after the call to InitializeComponent(), so a quick timer fire could occur here
+            if (vline != null)
+            {
+                double nextValue = ecg.GetVoltage(sw.Elapsed.TotalSeconds);
 
-            if (rollCheckbox.Checked)
-            {
-                // "roll" new values over old values like a traditional ECG machine
-                nextValueIndex = (nextValueIndex < liveData.Length - 1) ? nextValueIndex + 1 : 0;
-                liveData[nextValueIndex] = nextValue;
-                vline.IsVisible = true;
-                vline.X = nextValueIndex;
-            }
-            else
-            {
-                // "scroll" the whole chart to the left
-                Array.Copy(liveData, 1, liveData, 0, liveData.Length - 1);
-                liveData[liveData.Length - 1] = nextValue;
-                vline.IsVisible = false;
+                if (rollCheckbox.Checked)
+                {
+                    // "roll" new values over old values like a traditional ECG machine
+                    nextValueIndex = (nextValueIndex < liveData.Length - 1) ? nextValueIndex + 1 : 0;
+                    liveData[nextValueIndex] = nextValue;
+                    vline.IsVisible = true;
+                    vline.X = nextValueIndex;
+                }
+                else
+                {
+                    // "scroll" the whole chart to the left
+                    Array.Copy(liveData, 1, liveData, 0, liveData.Length - 1);
+                    liveData[liveData.Length - 1] = nextValue;
+                    vline.IsVisible = false;
+                }
             }
         }
 

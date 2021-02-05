@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ScottPlot
@@ -13,6 +14,7 @@ namespace ScottPlot
         public event EventHandler RightClicked;
         private readonly ScottPlot.Control.ControlBackEnd Backend;
         private readonly Dictionary<ScottPlot.Cursor, System.Windows.Forms.Cursor> Cursors;
+        private readonly EventHandler applicationIdleHandler;
 
         [Obsolete("Reference Plot instead of plt")]
         public ScottPlot.Plot plt => Plot;
@@ -50,15 +52,17 @@ namespace ScottPlot
         public void Reset() => Backend.Reset(Width, Height);
         public void Reset(Plot newPlot) => Backend.Reset(Width, Height, newPlot);
         private void PlottableCountTimer_Tick(object sender, EventArgs e) => Backend.RenderIfPlottableCountChanged();
-        public void Render(bool lowQuality = false, bool skipIfCurrentlyRendering = false)
+        public void Render(bool lowQuality = false, bool skipIfCurrentlyRendering = true)
         {
+            // DoEvents() here often causes StackOverflowExceptions, since it may be called
+            // in a message loop where the current message hasn't been processed yet
+            //Application.DoEvents();
             // TODO: if "skipIfCurrentlyRendering", setup a timer to render later
-            Application.DoEvents();
             Backend.Render(lowQuality, skipIfCurrentlyRendering);
         }
 
-        private void OnBitmapUpdated(object sender, EventArgs e) { Application.DoEvents(); pictureBox1.Invalidate(); }
-        private void OnBitmapChanged(object sender, EventArgs e) { pictureBox1.Image = Backend.GetLatestBitmap(); }
+        private void OnBitmapUpdated(object sender, EventArgs e) {  pictureBox1.Invalidate(); Application.DoEvents(); }
+        private void OnBitmapChanged(object sender, EventArgs e) { pictureBox1.Image = Backend.GetLatestBitmap(); pictureBox1.Refresh(); }
         private void OnCursorChanged(object sender, EventArgs e) => Cursor = Cursors[Backend.Cursor];
         private void OnSizeChanged(object sender, EventArgs e) => Backend.Resize(Width, Height);
         private void OnAxesChanged(object sender, EventArgs e) => AxesChanged?.Invoke(sender, e);
@@ -68,7 +72,7 @@ namespace ScottPlot
         private void PictureBox1_MouseUp(object sender, MouseEventArgs e) => Backend.MouseUp(GetInputState(e));
         private void PictureBox1_DoubleClick(object sender, EventArgs e) => Backend.DoubleClick();
         private void PictureBox1_MouseWheel(object sender, MouseEventArgs e) => Backend.MouseWheel(GetInputState(e));
-        private void PictureBox1_MouseMove(object sender, MouseEventArgs e) { Backend.MouseMove(GetInputState(e)); base.OnMouseMove(e); }
+        private void PictureBox1_MouseMove(object sender, MouseEventArgs e) { base.OnMouseMove(e); Backend.MouseMove(GetInputState(e)); }
 
         private static ScottPlot.Control.InputState GetInputState(MouseEventArgs e) =>
             new ScottPlot.Control.InputState()
