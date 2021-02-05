@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -53,46 +54,56 @@ namespace ScottPlot.Plottable
 
         public void Render(PlotDimensions dims, Bitmap bmp, bool lowQuality = false)
         {
-            List<double> xList = new List<double>();
-            List<double> yList = new List<double>();
+            var pointCount = (int)dims.DataWidth;
+            PointCount = pointCount;
 
-            PointCount = (int)dims.DataWidth;
-            for (int columnIndex = 0; columnIndex < dims.DataWidth; columnIndex++)
+            var xArr = ArrayPool<double>.Shared.Rent(pointCount);
+            var yArr = ArrayPool<double>.Shared.Rent(pointCount);
+
+            try
             {
-                double x = columnIndex * dims.UnitsPerPxX + dims.XMin;
-                try
+                PlotData<double> xList = xArr.AsMemory(0, pointCount);
+                PlotData<double> yList = yArr.AsMemory(0, pointCount);
+                for (int columnIndex = 0; columnIndex < dims.DataWidth; columnIndex++)
                 {
-                    double? y = Function(x);
+                    double x = columnIndex * dims.UnitsPerPxX + dims.XMin;
+                    try
+                    {
+                        double? y = Function(x);
 
-                    if (y is null)
-                        throw new NoNullAllowedException();
+                        if (y is null)
+                            throw new NoNullAllowedException();
 
-                    if (double.IsNaN(y.Value) || double.IsInfinity(y.Value))
-                        throw new ArithmeticException("not a real number");
+                        if (double.IsNaN(y.Value) || double.IsInfinity(y.Value))
+                            throw new ArithmeticException("not a real number");
 
-                    xList.Add(x);
-                    yList.Add(y.Value);
+                        xList[columnIndex] = x;
+                        yList[columnIndex] = y.Value;
+                    }
+                    catch (Exception e) //Domain error, such log(-1) or 1/0
+                    {
+                        Debug.WriteLine($"Y({x}) failed because {e}");
+                        continue;
+                    }
                 }
-                catch (Exception e) //Domain error, such log(-1) or 1/0
+
+                // create a temporary scatter plot and use it for rendering
+                var scatter = new ScatterPlot(xList, yList)
                 {
-                    Debug.WriteLine($"Y({x}) failed because {e}");
-                    continue;
-                }
+                    Color = Color,
+                    LineWidth = LineWidth,
+                    MarkerSize = 0,
+                    Label = Label,
+                    MarkerShape = MarkerShape.none,
+                    LineStyle = LineStyle
+                };
+                scatter.Render(dims, bmp, lowQuality);
             }
-
-            // create a temporary scatter plot and use it for rendering
-            double[] xs = xList.ToArray();
-            double[] ys = yList.ToArray();
-            var scatter = new ScatterPlot(xs, ys)
+            finally
             {
-                Color = Color,
-                LineWidth = LineWidth,
-                MarkerSize = 0,
-                Label = Label,
-                MarkerShape = MarkerShape.none,
-                LineStyle = LineStyle
-            };
-            scatter.Render(dims, bmp, lowQuality);
+                ArrayPool<double>.Shared.Return(xArr);
+                ArrayPool<double>.Shared.Return(yArr);
+            }
         }
 
         public void ValidateData(bool deepValidation = false)
