@@ -7,7 +7,7 @@ namespace ScottPlotTests.MinMaxSearchStrategies
     [TestFixture]
     public class SegmentedTreeMinMaxSearchStrategyTests
     {
-        public virtual IMinMaxSearchStrategy<T> CreateStrategy<T>() where T : struct, IComparable
+        public virtual IMinMaxSearchStrategy<T> CreateStrategy<T>() where T : struct, IComparable<T>
         {
             return new SegmentedTreeMinMaxSearchStrategy<T>();
         }

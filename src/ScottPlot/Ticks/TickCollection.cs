@@ -333,9 +333,9 @@ namespace ScottPlot.Ticks
             return (labels, cornerLabel);
         }
 
-        public double[] MinorFromMajor(double[] majorTicks, double minorTicksPerMajorTick, double lowerLimit, double upperLimit)
+        public double[] MinorFromMajor(in PlotData<double> majorTicks, double minorTicksPerMajorTick, double lowerLimit, double upperLimit)
         {
-            if ((majorTicks == null) || (majorTicks.Length < 2))
+            if (majorTicks.Length < 2)
                 return null;
 
             double majorTickSpacing = majorTicks[1] - majorTicks[0];
@@ -359,9 +359,9 @@ namespace ScottPlot.Ticks
             return minorTicks.ToArray();
         }
 
-        public double[] MinorFromMajorLog(double[] majorTicks, double lowerLimit, double upperLimit)
+        public double[] MinorFromMajorLog(in PlotData<double> majorTicks, double lowerLimit, double upperLimit)
         {
-            if ((majorTicks == null) || (majorTicks.Length < 2))
+            if (majorTicks.Length < 2)
                 return null;
 
             double majorTickSpacing = majorTicks[1] - majorTicks[0];

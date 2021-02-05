@@ -13,7 +13,7 @@ namespace ScottPlot.Statistics.Interpolation
     /// </summary>
     public class NaturalSpline : SplineInterpolator
     {
-        public NaturalSpline(double[] xs, double[] ys, int resolution = 10) : base(xs, ys, resolution)
+        public NaturalSpline(in PlotData<double> xs, in PlotData<double> ys, int resolution = 10) : base(xs, ys, resolution)
         {
             m = new Matrix(n - 2);
             gauss = new MatrixSolver(n - 2, m);

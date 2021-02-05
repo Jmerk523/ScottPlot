@@ -2,23 +2,23 @@
 
 namespace ScottPlot.MinMaxSearchStrategies
 {
-    public class LinearFastDoubleMinMaxSearchStrategy<T> : LinearMinMaxSearchStrategy<T> where T : struct, IComparable
+    public class LinearFastDoubleMinMaxSearchStrategy<T> : LinearMinMaxSearchStrategy<T> where T : struct, IComparable<T>
     {
-        private double[] sourceArrayDouble;
+        private PlotData<double> sourceArrayDouble;
 
-        public override T[] SourceArray
+        public override PlotData<T> SourceArray
         {
             get => base.SourceArray;
             set
             {
-                sourceArrayDouble = value as double[];
+                value.TryCast(out sourceArrayDouble);
                 base.SourceArray = value;
             }
         }
 
         public override void MinMaxRangeQuery(int l, int r, out double lowestValue, out double highestValue)
         {
-            if (sourceArrayDouble != null)
+            if (sourceArrayDouble.Length > 0)
             {
                 lowestValue = sourceArrayDouble[l];
                 highestValue = sourceArrayDouble[l];
@@ -39,7 +39,7 @@ namespace ScottPlot.MinMaxSearchStrategies
 
         public override double SourceElement(int index)
         {
-            if (sourceArrayDouble != null)
+            if (sourceArrayDouble.Length > 0)
                 return sourceArrayDouble[index];
             return Convert.ToDouble(SourceArray[index]);
         }

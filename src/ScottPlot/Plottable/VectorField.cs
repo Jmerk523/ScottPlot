@@ -13,10 +13,10 @@ namespace ScottPlot.Plottable
     public class VectorField : IPlottable
     {
         // data
-        private readonly double[] Xs;
-        private readonly double[] Ys;
-        private readonly Vector2[,] Vectors;
-        private readonly Color[] VectorColors;
+        private readonly PlotData<double> Xs;
+        private readonly PlotData<double> Ys;
+        private readonly PlotData2<Vector2> Vectors;
+        private readonly PlotData<Color> VectorColors;
 
         // customization
         public string Label;
@@ -24,7 +24,7 @@ namespace ScottPlot.Plottable
         public int XAxisIndex { get; set; } = 0;
         public int YAxisIndex { get; set; } = 0;
 
-        public VectorField(Vector2[,] vectors, double[] xs, double[] ys, Colormap colormap, double scaleFactor, Color defaultColor)
+        public VectorField(in PlotData2<Vector2> vectors, in PlotData<double> xs, in PlotData<double> ys, Colormap colormap, double scaleFactor, Color defaultColor)
         {
             double minMagnitudeSquared = vectors[0, 0].LengthSquared();
             double maxMagnitudeSquared = vectors[0, 0].LengthSquared();
@@ -41,7 +41,7 @@ namespace ScottPlot.Plottable
             double minMagnitude = Math.Sqrt(minMagnitudeSquared);
             double maxMagnitude = Math.Sqrt(maxMagnitudeSquared);
 
-            double[,] intensities = new double[xs.Length, ys.Length];
+            PlotData2<double> intensities = new PlotData2<double>(xs.Length, ys.Length);
             for (int i = 0; i < xs.Length; i++)
             {
                 for (int j = 0; j < ys.Length; j++)
@@ -52,7 +52,7 @@ namespace ScottPlot.Plottable
                 }
             }
 
-            double[] flattenedIntensities = intensities.Cast<double>().ToArray();
+            PlotData<double> flattenedIntensities = intensities.Flatten();
             VectorColors = colormap is null ?
                 Enumerable.Range(0, flattenedIntensities.Length).Select(x => defaultColor).ToArray() :
                 Colormap.GetColors(flattenedIntensities, colormap);

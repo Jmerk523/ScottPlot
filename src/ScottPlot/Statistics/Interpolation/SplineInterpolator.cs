@@ -10,7 +10,7 @@ namespace ScottPlot.Statistics.Interpolation
 {
     public abstract class SplineInterpolator
     {
-        public double[] givenYs, givenXs;
+        public PlotData<double> givenYs, givenXs;
         public double[] interpolatedXs, interpolatedYs;
 
         protected Matrix m;
@@ -19,11 +19,8 @@ namespace ScottPlot.Statistics.Interpolation
         protected readonly int n;
         protected double[] a, b, c, d, h;
 
-        protected SplineInterpolator(double[] xs, double[] ys, int resolution = 10)
+        protected SplineInterpolator(in PlotData<double> xs, in PlotData<double> ys, int resolution = 10)
         {
-            if (xs is null || ys is null)
-                throw new ArgumentException("xs and ys cannot be null");
-
             if (xs.Length != ys.Length)
                 throw new ArgumentException("xs and ys must have the same length");
 

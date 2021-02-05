@@ -756,7 +756,7 @@ namespace ScottPlot
             int? maxRenderIndex = null,
             LineStyle lineStyle = LineStyle.Solid,
             bool useParallel = true
-            ) where T : struct, IComparable
+            ) where T : struct, IComparable<T>
         {
             SignalPlotConst<T> signal = new SignalPlotConst<T>()
             {
@@ -823,7 +823,7 @@ namespace ScottPlot
             int? maxRenderIndex = null,
             LineStyle lineStyle = LineStyle.Solid,
             bool useParallel = true
-            ) where TX : struct, IComparable where TY : struct, IComparable
+            ) where TX : struct, IComparable<TX> where TY : struct, IComparable<TY>
 
         {
             SignalPlotXYConst<TX, TY> signal = new SignalPlotXYConst<TX, TY>()

@@ -21,7 +21,7 @@ namespace ScottPlot
             return ys;
         }
 
-        public static double[] Sin(double[] xs, double mult = 1)
+        public static double[] Sin(in PlotData<double> xs, double mult = 1)
         {
             double[] ys = new double[xs.Length];
             for (int i = 0; i < xs.Length; i++)
@@ -62,7 +62,7 @@ namespace ScottPlot
             return data;
         }
 
-        public static double[] Cos(double[] xs)
+        public static double[] Cos(in PlotData<double> xs)
         {
             double[] ys = new double[xs.Length];
             for (int i = 0; i < xs.Length; i++)
@@ -79,7 +79,7 @@ namespace ScottPlot
             return ys;
         }
 
-        public static double[] Tan(double[] xs)
+        public static double[] Tan(in PlotData<double> xs)
         {
             double[] ys = new double[xs.Length];
             for (int i = 0; i < xs.Length; i++)
@@ -312,10 +312,10 @@ namespace ScottPlot
             return values;
         }
 
-        public static Bitmap BitmapFrom2dArray(double[,] data, Colormap cmap)
+        public static Bitmap BitmapFrom2dArray(in PlotData2<double> data, Colormap cmap)
         {
-            int width = data.GetLength(1);
-            int height = data.GetLength(0);
+            int width = data.Columns;
+            int height = data.Rows;
 
             Bitmap bmp = new Bitmap(width, height, PixelFormat.Format8bppIndexed);
             Rectangle rect = new Rectangle(0, 0, width, height);

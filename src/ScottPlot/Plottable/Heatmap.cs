@@ -54,15 +54,15 @@ namespace ScottPlot.Plottable
         /// <param name="colormap">update the Colormap to use this colormap</param>
         /// <param name="min">minimum intensity (according to the colormap)</param>
         /// <param name="max">maximum intensity (according to the colormap)</param>
-        public void Update(double?[,] intensities, Colormap colormap = null, double? min = null, double? max = null)
+        public void Update(in PlotData2<double?> intensities, Colormap colormap = null, double? min = null, double? max = null)
         {
-            Width = intensities.GetLength(1);
-            Height = intensities.GetLength(0);
+            Width = intensities.Columns;
+            Height = intensities.Rows;
             Colormap = colormap ?? Colormap;
             ScaleMin = min;
             ScaleMax = max;
 
-            double?[] intensitiesFlattened = intensities.Cast<double?>().ToArray();
+            var intensitiesFlattened = intensities.Flatten();
             Min = double.PositiveInfinity;
             Max = double.NegativeInfinity;
 
@@ -112,11 +112,11 @@ namespace ScottPlot.Plottable
         /// <param name="colormap">update the Colormap to use this colormap</param>
         /// <param name="min">minimum intensity (according to the colormap)</param>
         /// <param name="max">maximum intensity (according to the colormap)</param>
-        public void Update(double[,] intensities, Colormap colormap = null, double? min = null, double? max = null)
+        public void Update(in PlotData2<double> intensities, Colormap colormap = null, double? min = null, double? max = null)
         {
-            double?[,] tmp = new double?[intensities.GetLength(0), intensities.GetLength(1)];
-            for (int i = 0; i < intensities.GetLength(0); i++)
-                for (int j = 0; j < intensities.GetLength(1); j++)
+            double?[,] tmp = new double?[intensities.Rows, intensities.Columns];
+            for (int i = 0; i < intensities.Rows; i++)
+                for (int j = 0; j < intensities.Columns; j++)
                     tmp[i, j] = intensities[i, j];
             Update(tmp, colormap, min, max);
         }
@@ -124,7 +124,7 @@ namespace ScottPlot.Plottable
         private double? Normalize(double? input, double? min = null, double? max = null, double? scaleMin = null, double? scaleMax = null)
             => Normalize(new double?[] { input }, min, max, scaleMin, scaleMax)[0];
 
-        private double?[] Normalize(double?[] input, double? min = null, double? max = null, double? scaleMin = null, double? scaleMax = null)
+        private double?[] Normalize(in PlotData<double?> input, double? min = null, double? max = null, double? scaleMin = null, double? scaleMax = null)
         {
             double? NormalizePreserveNull(double? i)
             {

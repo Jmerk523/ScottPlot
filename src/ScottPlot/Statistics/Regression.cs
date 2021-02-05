@@ -10,10 +10,10 @@ namespace ScottPlot.Statistics
         public readonly double rSquared;
 
         private readonly int pointCount;
-        private readonly double[] xs;
-        private readonly double[] ys;
+        private readonly PlotData<double> xs;
+        private readonly PlotData<double> ys;
 
-        public LinearRegressionLine(double[] xs, double[] ys)
+        public LinearRegressionLine(in PlotData<double> xs, in PlotData<double> ys)
         {
             if ((xs.Length != ys.Length) || (xs.Length < 2))
             {
@@ -26,7 +26,7 @@ namespace ScottPlot.Statistics
             (slope, offset, rSquared) = GetCoefficients(xs, ys);
         }
 
-        public LinearRegressionLine(double[] ys, double firstX, double xSpacing)
+        public LinearRegressionLine(in PlotData<double> ys, double firstX, double xSpacing)
         {
             // this constructor doesn't require an X array to be passed in at all
             pointCount = ys.Length;
@@ -45,7 +45,7 @@ namespace ScottPlot.Statistics
             return $"Linear fit for {pointCount} points: Y = {slope}x + {offset} (R² = {rSquared})";
         }
 
-        private static (double, double, double) GetCoefficients(double[] xs, double[] ys)
+        private static (double, double, double) GetCoefficients(in PlotData<double> xs, in PlotData<double> ys)
         {
             double sumXYResidual = 0;
             double sumXSquareResidual = 0;

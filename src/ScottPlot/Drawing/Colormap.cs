@@ -109,7 +109,7 @@ namespace ScottPlot.Drawing
             bmp.Palette = pal;
         }
 
-        public static byte[,] IntenstitiesToRGB(double[] intensities, IColormap cmap)
+        public static byte[,] IntenstitiesToRGB(in PlotData<double> intensities, IColormap cmap)
         {
             byte[,] output = new byte[intensities.Length, 3];
             for (int i = 0; i < intensities.Length; i++)
@@ -124,7 +124,7 @@ namespace ScottPlot.Drawing
             return output;
         }
 
-        public static int[] GetRGBAs(double[] intensities, Colormap colorMap, double minimumIntensity = 0)
+        public static int[] GetRGBAs(in PlotData<double> intensities, Colormap colorMap, double minimumIntensity = 0)
         {
             int[] rgbas = new int[intensities.Length];
             for (int i = 0; i < intensities.Length; i++)
@@ -138,7 +138,7 @@ namespace ScottPlot.Drawing
             return rgbas;
         }
 
-        public static int[] GetRGBAs(double?[] intensities, Colormap colorMap, double minimumIntensity = 0)
+        public static int[] GetRGBAs(in PlotData<double?> intensities, Colormap colorMap, double minimumIntensity = 0)
         {
             int[] rgbas = new int[intensities.Length];
             for (int i = 0; i < intensities.Length; i++)
@@ -160,7 +160,7 @@ namespace ScottPlot.Drawing
             return rgbas;
         }
 
-        public static Color[] GetColors(double[] intensities, Colormap colorMap)
+        public static Color[] GetColors(in PlotData<double> intensities, Colormap colorMap)
         {
             Color[] colors = new Color[intensities.Length];
             for (int i = 0; i < intensities.Length; i++)

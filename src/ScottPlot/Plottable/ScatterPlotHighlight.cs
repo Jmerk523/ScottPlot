@@ -11,7 +11,7 @@ namespace ScottPlot.Plottable
         public Color highlightedColor = Color.Red;
         protected bool[] isHighlighted;
 
-        public ScatterPlotHighlight(double[] xs, double[] ys, double[] xErr = null, double[] yErr = null) :
+        public ScatterPlotHighlight(in PlotData<double> xs, in PlotData<double> ys, in PlotData<double> xErr = default, in PlotData<double> yErr = default) :
                                     base(xs, ys, xErr, yErr) => HighlightClear();
 
         public new void Render(PlotDimensions dims, Bitmap bmp, bool lowQuality = false) => throw new NotImplementedException();

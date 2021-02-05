@@ -13,7 +13,7 @@ namespace ScottPlot.Statistics
         /// <param name="values">number of values to use for each calculation</param>
         /// <param name="period">number of values to use for each calculation</param>
         /// <param name="trimNan">only return data where values are present for the whole period</param>
-        public static double[] SMA(double[] values, int period, bool trimNan = true)
+        public static double[] SMA(in PlotData<double> values, int period, bool trimNan = true)
         {
             if (period < 2)
                 throw new ArgumentException("period must be 2 or greater");
@@ -33,7 +33,7 @@ namespace ScottPlot.Statistics
                     // TODO: could optimize this for perforance by not copying
                     // to do this create a Common.Mean overload
                     var periodValues = new double[period];
-                    Array.Copy(values, i - period + 1, periodValues, 0, period);
+                    values.Data.Slice(i - period + 1, period).CopyTo(periodValues);
                     sma[i] = Common.Mean(periodValues);
                 }
             }

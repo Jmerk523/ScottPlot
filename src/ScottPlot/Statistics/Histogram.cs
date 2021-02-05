@@ -20,7 +20,7 @@ namespace ScottPlot.Statistics
 {
     public class Histogram
     {
-        public double[] values;
+        public PlotData<double> values;
         public Population population;
         public double[] bins;
         public double[] counts;
@@ -33,7 +33,7 @@ namespace ScottPlot.Statistics
         public double mean { get { return population.mean; } }
         public double stdev { get { return population.stDev; } }
 
-        public Histogram(double[] values, double? min = null, double? max = null, double? binSize = null, double? binCount = null, bool ignoreOutOfBounds = true)
+        public Histogram(in PlotData<double> values, double? min = null, double? max = null, double? binSize = null, double? binCount = null, bool ignoreOutOfBounds = true)
         {
             this.values = values;
             population = new Population(values);
@@ -98,7 +98,7 @@ namespace ScottPlot.Statistics
             return bins;
         }
 
-        private static double[] GetHistogram(double[] values, double[] bins, bool ignoreOutOfBounds = true)
+        private static double[] GetHistogram(in PlotData<double> values, double[] bins, bool ignoreOutOfBounds = true)
         {
             double binSize = bins[1] - bins[0];
             double[] counts = new double[bins.Length];

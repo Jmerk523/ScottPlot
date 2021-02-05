@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 
 namespace ScottPlot.DataStructures
 {
-    public class SegmentedTree<T> where T : struct, IComparable
+    public class SegmentedTree<T> where T : struct, IComparable<T>
     {
-        private T[] sourceArray;
+        private PlotData<T> sourceArray;
 
         private T[] TreeMin;
         private T[] TreeMax;
@@ -21,13 +21,11 @@ namespace ScottPlot.DataStructures
         private static Func<T, T, bool> LessThanExp;
         private static Func<T, T, bool> GreaterThanExp;
 
-        public T[] SourceArray
+        public PlotData<T> SourceArray
         {
             get => sourceArray;
             set
             {
-                if (value == null)
-                    throw new Exception("Source Array cannot be null");
                 sourceArray = value;
                 UpdateTrees();
             }
@@ -46,14 +44,14 @@ namespace ScottPlot.DataStructures
             InitExp();
         }
 
-        public SegmentedTree(T[] data)
+        public SegmentedTree(PlotData<T> data)
         {
             UpdateTreesInBackground();
         }
 
-        public async Task SetSourceAsync(T[] data)
+        public async Task SetSourceAsync(PlotData<T> data)
         {
-            sourceArray = data ?? throw new ArgumentNullException("Data cannot be null");
+            sourceArray = data;
             await Task.Run(() => UpdateTrees());
         }
 
@@ -116,7 +114,7 @@ namespace ScottPlot.DataStructures
             }
         }
 
-        public void updateRange(int from, int to, T[] newData, int fromData = 0) // RangeUpdate
+        public void updateRange(int from, int to, PlotData<T> newData, int fromData = 0) // RangeUpdate
         {
             //update source signal
             for (int i = from; i < to; i++)
@@ -181,12 +179,12 @@ namespace ScottPlot.DataStructures
             }
         }
 
-        public void updateData(int from, T[] newData)
+        public void updateData(int from, PlotData<T> newData)
         {
             updateRange(from, newData.Length, newData);
         }
 
-        public void updateData(T[] newData)
+        public void updateData(PlotData<T> newData)
         {
             updateRange(0, newData.Length, newData);
         }

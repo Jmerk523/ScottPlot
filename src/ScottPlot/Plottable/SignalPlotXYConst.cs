@@ -8,7 +8,7 @@ namespace ScottPlot.Plottable
     /// </summary>
     /// <typeparam name="TX"></typeparam>
     /// <typeparam name="TY"></typeparam>
-    public class SignalPlotXYConst<TX, TY> : SignalPlotXYGeneric<TX, TY> where TX : struct, IComparable where TY : struct, IComparable
+    public class SignalPlotXYConst<TX, TY> : SignalPlotXYGeneric<TX, TY> where TX : struct, IComparable<TX> where TY : struct, IComparable<TY>
     {
         public bool TreesReady => (Strategy as SegmentedTreeMinMaxSearchStrategy<TY>)?.TreesReady ?? false;
 

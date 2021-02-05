@@ -12,7 +12,7 @@ namespace ScottPlot.Plottable
         /// <summary>
         /// Array of prices (open high low close)
         /// </summary>
-        public OHLC[] OHLCs;
+        public PlotData<OHLC> OHLCs;
 
         /// <summary>
         /// Display prices as filled candlesticks (otherwise display as OHLC lines)
@@ -86,13 +86,8 @@ namespace ScottPlot.Plottable
 
         public void ValidateData(bool deepValidation = false)
         {
-            if (OHLCs is null)
-                throw new InvalidOperationException("ohlcs cannot be null");
-
             for (int i = 0; i < OHLCs.Length; i++)
             {
-                if (OHLCs[i] is null)
-                    throw new InvalidOperationException($"ohlcs[{i}] cannot be null");
                 if (!OHLCs[i].IsValid)
                     throw new InvalidOperationException($"ohlcs[{i}] does not contain valid data");
             }

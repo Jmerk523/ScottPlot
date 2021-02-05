@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace ScottPlot
 {
-    public class OHLC
+    public struct OHLC
     {
         public double open;
         public double high;
         public double low;
         public double close;
         public double time;
-        public double timeSpan = 1;
+        public double timeSpan;
 
         public double highestOpenClose;
         public double lowestOpenClose;

@@ -12,7 +12,7 @@ namespace ScottPlot.Plottable
     /// </summary>
     public class PiePlot : IPlottable
     {
-        public double[] Values;
+        public PlotData<double> Values;
         public string Label;
         public string[] SliceLabels;
 
@@ -36,7 +36,7 @@ namespace ScottPlot.Plottable
         public int XAxisIndex { get; set; } = 0;
         public int YAxisIndex { get; set; } = 0;
 
-        public PiePlot(double[] values, string[] groupNames, Color[] colors)
+        public PiePlot(in PlotData<double> values, string[] groupNames, Color[] colors)
         {
             Values = values;
             SliceLabels = groupNames;

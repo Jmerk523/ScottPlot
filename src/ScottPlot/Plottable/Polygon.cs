@@ -12,8 +12,8 @@ namespace ScottPlot.Plottable
     public class Polygon : IPlottable
     {
         // data
-        public double[] Xs;
-        public double[] Ys;
+        public PlotData<double> Xs;
+        public PlotData<double> Ys;
 
         // configuration
         public string Label;
@@ -27,7 +27,7 @@ namespace ScottPlot.Plottable
         public Color HatchColor = Color.Transparent;
         public HatchStyle HatchStyle = HatchStyle.None;
 
-        public Polygon(double[] xs, double[] ys)
+        public Polygon(in PlotData<double> xs, in PlotData<double> ys)
         {
             Xs = xs;
             Ys = ys;

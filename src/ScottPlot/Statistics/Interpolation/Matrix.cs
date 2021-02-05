@@ -7,7 +7,7 @@
 
 namespace ScottPlot.Statistics.Interpolation
 {
-    public class Matrix
+    public struct Matrix
     {
         public double[,] a;
         public double[] y;

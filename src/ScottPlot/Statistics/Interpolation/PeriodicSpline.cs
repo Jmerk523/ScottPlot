@@ -13,7 +13,7 @@ namespace ScottPlot.Statistics.Interpolation
     /// </summary>
     public class PeriodicSpline : SplineInterpolator
     {
-        public PeriodicSpline(double[] xs, double[] ys, int resolution = 10) : base(xs, ys, resolution)
+        public PeriodicSpline(in PlotData<double> xs, in PlotData<double> ys, int resolution = 10) : base(xs, ys, resolution)
         {
             m = new Matrix(n - 1);
             gauss = new MatrixSolver(n - 1, m);

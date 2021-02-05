@@ -13,16 +13,14 @@ namespace ScottPlot.Plottable
     /// </summary>
     /// <typeparam name="TX"></typeparam>
     /// <typeparam name="TY"></typeparam>
-    public class SignalPlotXYGeneric<TX, TY> : SignalPlotBase<TY> where TX : struct, IComparable where TY : struct, IComparable
+    public class SignalPlotXYGeneric<TX, TY> : SignalPlotBase<TY> where TX : struct, IComparable<TX> where TY : struct, IComparable<TY>
     {
-        private TX[] _Xs;
-        public TX[] Xs
+        private PlotData<TX> _Xs;
+        public PlotData<TX> Xs
         {
             get => _Xs;
             set
             {
-                if (value == null)
-                    throw new ArgumentException("XS cannot be null");
                 if (value.Length == 0)
                     throw new ArgumentException("XS must have at least one element");
 
@@ -34,7 +32,7 @@ namespace ScottPlot.Plottable
             }
         }
 
-        public override TY[] Ys
+        public override PlotData<TY> Ys
         {
             get => _Ys;
             set
@@ -65,13 +63,13 @@ namespace ScottPlot.Plottable
             TX start = (TX)Convert.ChangeType(dims.XMin + dims.XSpan / dims.DataWidth * x, typeof(TX));
             TX end = (TX)Convert.ChangeType(dims.XMin + dims.XSpan / dims.DataWidth * (x + 1), typeof(TX));
 
-            int startIndex = Array.BinarySearch(Xs, from, length, start);
+            int startIndex = Xs.BinarySearch(from, length, start);
             if (startIndex < 0)
             {
                 startIndex = ~startIndex;
             }
 
-            int endIndex = Array.BinarySearch(Xs, from, length, end);
+            int endIndex = Xs.BinarySearch(from, length, end);
             if (endIndex < 0)
             {
                 endIndex = ~endIndex;
@@ -108,7 +106,7 @@ namespace ScottPlot.Plottable
                 int searchTo;
 
                 // Calculate point before displayed points
-                int pointBeforeIndex = Array.BinarySearch(Xs, MinRenderIndex, MaxRenderIndex - MinRenderIndex + 1, Convert.ChangeType(dims.XMin, typeof(TX)));
+                int pointBeforeIndex = Xs.BinarySearch(MinRenderIndex, MaxRenderIndex - MinRenderIndex + 1, (TX)Convert.ChangeType(dims.XMin, typeof(TX)));
                 if (pointBeforeIndex < 0)
                 {
                     pointBeforeIndex = ~pointBeforeIndex;
@@ -130,7 +128,7 @@ namespace ScottPlot.Plottable
                 }
 
                 // Calculate point after displayed points
-                int pointAfterIndex = Array.BinarySearch(Xs, MinRenderIndex, MaxRenderIndex - MinRenderIndex + 1, Convert.ChangeType(dims.XMax, typeof(TX)));
+                int pointAfterIndex = Xs.BinarySearch(MinRenderIndex, MaxRenderIndex - MinRenderIndex + 1, (TX)Convert.ChangeType(dims.XMax, typeof(TX)));
                 if (pointAfterIndex < 0)
                 {
                     pointAfterIndex = ~pointAfterIndex;

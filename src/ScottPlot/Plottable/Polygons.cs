@@ -14,6 +14,9 @@ namespace ScottPlot.Plottable
     public class Polygons : IPlottable
     {
         // data
+        // This could also be wrapped in a PlotData<double> of subspan-polys,
+        // but that would preclude dynamic addition/removal, if that is important.
+        // It would also be slightly more complex, but not by much.
         public readonly List<List<(double x, double y)>> Polys;
 
         // customization

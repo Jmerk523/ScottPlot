@@ -10,8 +10,8 @@ namespace ScottPlot.Statistics
     /// </summary>
     public class Population
     {
-        public double[] values { get; private set; }
-        public double[] sortedValues { get; private set; }
+        public PlotData<double> values { get; private set; }
+        public PlotData<double> sortedValues { get; private set; }
         public double min { get; private set; }
         public double max { get; private set; }
         public double median { get; private set; }
@@ -46,21 +46,15 @@ namespace ScottPlot.Statistics
         /// <summary>
         /// Calculate population stats from the given array of values
         /// </summary>
-        public Population(double[] values)
+        public Population(in PlotData<double> values)
         {
-            if (values is null)
-                throw new ArgumentException("values cannot be null");
-
             this.values = values;
             Recalculate();
         }
 
         [Obsolete("This constructor overload is deprecated. Please remove the fullAnalysis argument.")]
-        public Population(double[] values, bool fullAnalysis = true)
+        public Population(in PlotData<double> values, bool fullAnalysis = true)
         {
-            if (values is null)
-                throw new ArgumentException("values cannot be null");
-
             this.values = values;
             if (fullAnalysis)
                 Recalculate();
@@ -72,9 +66,9 @@ namespace ScottPlot.Statistics
 
             int QSize = (int)Math.Floor(count / 4.0);
 
-            sortedValues = new double[count];
-            Array.Copy(values, 0, sortedValues, 0, count);
-            Array.Sort(sortedValues);
+            var sortArray = values.Data.ToArray();
+            Array.Sort(sortArray);
+            sortedValues = sortArray;
 
             min = sortedValues.First();
             max = sortedValues.Last();
@@ -116,10 +110,8 @@ namespace ScottPlot.Statistics
                 }
             }
 
-            lowOutliers = new double[minNonOutlierIndex];
-            highOutliers = new double[sortedValues.Length - maxNonOutlierIndex - 1];
-            Array.Copy(sortedValues, 0, lowOutliers, 0, lowOutliers.Length);
-            Array.Copy(sortedValues, maxNonOutlierIndex + 1, highOutliers, 0, highOutliers.Length);
+            lowOutliers = sortedValues.Data.Slice(0, minNonOutlierIndex).ToArray();
+            highOutliers = sortedValues.Data.Slice(maxNonOutlierIndex + 1, sortedValues.Length - maxNonOutlierIndex - 1).ToArray();
             minNonOutlier = sortedValues[minNonOutlierIndex];
             maxNonOutlier = sortedValues[maxNonOutlierIndex];
 
@@ -142,7 +134,7 @@ namespace ScottPlot.Statistics
             stdErr = stDev / Math.Sqrt(count);
         }
 
-        public double[] GetDistribution(double[] xs, bool normalize)
+        public double[] GetDistribution(in PlotData<double> xs, bool normalize)
         {
             double[] ys = new double[xs.Length];
             for (int i = 0; i < xs.Length; i++)

@@ -3,7 +3,7 @@ using System;
 
 namespace ScottPlot.MinMaxSearchStrategies
 {
-    public class SegmentedTreeMinMaxSearchStrategy<T> : IMinMaxSearchStrategy<T> where T : struct, IComparable
+    public class SegmentedTreeMinMaxSearchStrategy<T> : IMinMaxSearchStrategy<T> where T : struct, IComparable<T>
     {
         private SegmentedTree<T> segmentedTree;
 
@@ -13,12 +13,12 @@ namespace ScottPlot.MinMaxSearchStrategies
             segmentedTree = new SegmentedTree<T>();
         }
 
-        public SegmentedTreeMinMaxSearchStrategy(T[] data) : this()
+        public SegmentedTreeMinMaxSearchStrategy(in PlotData<T> data) : this()
         {
             SourceArray = data;
         }
 
-        public T[] SourceArray
+        public PlotData<T> SourceArray
         {
             get => segmentedTree.SourceArray;
             set => segmentedTree.SourceArray = value;
@@ -39,7 +39,7 @@ namespace ScottPlot.MinMaxSearchStrategies
             segmentedTree.updateElement(index, newValue);
         }
 
-        public void updateRange(int from, int to, T[] newData, int fromData = 0)
+        public void updateRange(int from, int to, PlotData<T> newData, int fromData = 0)
         {
             segmentedTree.updateRange(from, to, newData, fromData);
         }

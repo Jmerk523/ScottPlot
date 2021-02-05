@@ -56,7 +56,7 @@ namespace ScottPlot
         /// <summary>
         /// Add a bar plot for the given values. Bars will be placed at X positions 0, 1, 2, etc.
         /// </summary>
-        public BarPlot AddBar(double[] values, Color? color = null)
+        public BarPlot AddBar(in PlotData<double> values, Color? color = null)
         {
             double[] xs = DataGen.Consecutive(values.Length);
             var plottable = new BarPlot(xs, values, null, null)
@@ -70,7 +70,7 @@ namespace ScottPlot
         /// <summary>
         /// Add a bar plot for the given values using defined bar positions
         /// </summary>
-        public BarPlot AddBar(double[] values, double[] positions, Color? color = null)
+        public BarPlot AddBar(in PlotData<double> values, in PlotData<double> positions, Color? color = null)
         {
             var plottable = new BarPlot(positions, values, null, null)
             {
@@ -83,7 +83,7 @@ namespace ScottPlot
         /// <summary>
         /// Add a bar plot (values +/- errors) using defined positions
         /// </summary>
-        public BarPlot AddBar(double[] values, double[] errors, double[] positions, Color? color = null)
+        public BarPlot AddBar(in PlotData<double> values, in PlotData<double> errors, in PlotData<double> positions, Color? color = null)
         {
             var plottable = new BarPlot(positions, values, errors, null)
             {
@@ -145,7 +145,7 @@ namespace ScottPlot
         /// <summary>
         /// Add candlesticks to the chart from OHLC (open, high, low, close) data
         /// </summary>
-        public FinancePlot AddCandlesticks(OHLC[] ohlcs)
+        public FinancePlot AddCandlesticks(in PlotData<OHLC> ohlcs)
         {
             FinancePlot plottable = new FinancePlot()
             {
@@ -185,7 +185,7 @@ namespace ScottPlot
         /// <summary>
         /// Create a polygon to fill the area between Y values and a baseline.
         /// </summary>
-        public Polygon AddFill(double[] xs, double[] ys, double baseline = 0, Color? color = null)
+        public Polygon AddFill(in PlotData<double> xs, in PlotData<double> ys, double baseline = 0, Color? color = null)
         {
             var plottable = new Polygon(
                 xs: Tools.Pad(xs, cloneEdges: true),
@@ -201,7 +201,7 @@ namespace ScottPlot
         /// <summary>
         /// Create a polygon to fill the area between Y values of two curves.
         /// </summary>
-        public Polygon AddFill(double[] xs1, double[] ys1, double[] xs2, double[] ys2, Color? color = null)
+        public Polygon AddFill(in PlotData<double> xs1, in PlotData<double> ys1, in PlotData<double> xs2, in PlotData<double> ys2, Color? color = null)
         {
             // combine xs and ys to make one big curve
             int pointCount = xs1.Length + xs2.Length;
@@ -209,8 +209,8 @@ namespace ScottPlot
             double[] bothY = new double[pointCount];
 
             // copy the first dataset as-is
-            Array.Copy(xs1, 0, bothX, 0, xs1.Length);
-            Array.Copy(ys1, 0, bothY, 0, ys1.Length);
+            xs1.Data.CopyTo(bothX);
+            ys1.Data.CopyTo(bothY);
 
             // copy the second dataset in reverse order
             for (int i = 0; i < xs2.Length; i++)
@@ -232,7 +232,7 @@ namespace ScottPlot
         /// Create a polygon to fill the area between Y values and a baseline
         /// that uses two different colors for area above and area below the baseline.
         /// </summary>
-        public (Polygon polyAbove, Polygon polyBelow) AddFillAboveAndBelow(double[] xs, double[] ys, double baseline = 0, Color? colorAbove = null, Color? colorBelow = null)
+        public (Polygon polyAbove, Polygon polyBelow) AddFillAboveAndBelow(in PlotData<double> xs, in PlotData<double> ys, double baseline = 0, Color? colorAbove = null, Color? colorBelow = null)
         {
             var (xs2, ysAbove, ysBelow) = Drawing.Tools.PolyAboveAndBelow(xs, ys, baseline);
 
@@ -262,7 +262,7 @@ namespace ScottPlot
         /// <summary>
         /// Add a heatmap to the plot
         /// </summary>
-        public Heatmap AddHeatmap(double[,] intensities, Drawing.Colormap colormap = null, bool lockScales = true)
+        public Heatmap AddHeatmap(in PlotData2<double> intensities, Drawing.Colormap colormap = null, bool lockScales = true)
         {
             if (lockScales)
                 AxisScaleLock(true);
@@ -344,7 +344,7 @@ namespace ScottPlot
         /// <summary>
         /// Add OHLC (open, high, low, close) data to the plot
         /// </summary>
-        public FinancePlot AddOHLCs(OHLC[] ohlcs)
+        public FinancePlot AddOHLCs(in PlotData<OHLC> ohlcs)
         {
             FinancePlot plottable = new FinancePlot()
             {
@@ -360,7 +360,7 @@ namespace ScottPlot
         /// <summary>
         /// Add a pie chart to the plot
         /// </summary>
-        public PiePlot AddPie(double[] values, bool hideGridAndFrame = true)
+        public PiePlot AddPie(in PlotData<double> values, bool hideGridAndFrame = true)
         {
             Color[] colors = Enumerable.Range(0, values.Length)
                                        .Select(i => settings.PlottablePalette.GetColor(i))
@@ -396,7 +396,7 @@ namespace ScottPlot
         /// <summary>
         /// Add a polygon to the plot
         /// </summary>
-        public Polygon AddPolygon(double[] xs, double[] ys, Color? fillColor = null, double lineWidth = 0, Color? lineColor = null)
+        public Polygon AddPolygon(in PlotData<double> xs, in PlotData<double> ys, Color? fillColor = null, double lineWidth = 0, Color? lineColor = null)
         {
             var plottable = new Polygon(xs, ys)
             {
@@ -459,7 +459,7 @@ namespace ScottPlot
         /// <summary>
         /// Add a radar plot
         /// </summary>
-        public RadarPlot AddRadar(double[,] values, bool independentAxes = false, double[] maxValues = null, bool disableFrameAndGrid = true)
+        public RadarPlot AddRadar(in PlotData2<double> values, bool independentAxes = false, double[] maxValues = null, bool disableFrameAndGrid = true)
         {
 
             Color[] colors = Enumerable.Range(0, values.Length)
@@ -502,8 +502,8 @@ namespace ScottPlot
         /// Scatter plots are slower than Signal plots.
         /// </summary>
         public ScatterPlot AddScatter(
-            double[] xs,
-            double[] ys,
+            in PlotData<double> xs,
+            in PlotData<double> ys,
             Color? color = null,
             float lineWidth = 1,
             float markerSize = 5,
@@ -529,8 +529,8 @@ namespace ScottPlot
         /// Scatter plots are slower than Signal plots.
         /// </summary>
         public ScatterPlot AddScatterLines(
-            double[] xs,
-            double[] ys,
+            in PlotData<double> xs,
+            in PlotData<double> ys,
             Color? color = null,
             float lineWidth = 1,
             LineStyle lineStyle = LineStyle.Solid,
@@ -553,8 +553,8 @@ namespace ScottPlot
         /// Scatter plots are slower than Signal plots.
         /// </summary>
         public ScatterPlot AddScatterPoints(
-            double[] xs,
-            double[] ys,
+            in PlotData<double> xs,
+            in PlotData<double> ys,
             Color? color = null,
             float markerSize = 5,
             MarkerShape markerShape = MarkerShape.filledCircle,
@@ -600,7 +600,7 @@ namespace ScottPlot
         /// <summary>
         /// Signal plots have evenly-spaced X points and render very fast.
         /// </summary>
-        public SignalPlot AddSignal(double[] ys, double sampleRate = 1, Color? color = null, string label = null)
+        public SignalPlot AddSignal(in PlotData<double> ys, double sampleRate = 1, Color? color = null, string label = null)
         {
             SignalPlot signal = new SignalPlot()
             {
@@ -622,7 +622,17 @@ namespace ScottPlot
         /// but data in source arrays cannot be changed after it is loaded.
         /// Methods can be used to update all or portions of the data.
         /// </summary>
-        public SignalPlotConst<T> AddSignalConst<T>(T[] ys, double sampleRate = 1, Color? color = null, string label = null) where T : struct, IComparable
+        public SignalPlotConst<T> AddSignalConst<T>(T[] ys, double sampleRate = 1, Color? color = null, string label = null) where T : struct, IComparable<T>
+        {
+            return AddSignalConstData<T>(ys, sampleRate, color, label);
+        }
+
+        /// <summary>
+        /// SignalConts plots have evenly-spaced X points and render faster than Signal plots
+        /// but data in source arrays cannot be changed after it is loaded.
+        /// Methods can be used to update all or portions of the data.
+        /// </summary>
+        public SignalPlotConst<T> AddSignalConstData<T>(in PlotData<T> ys, double sampleRate = 1, Color? color = null, string label = null) where T : struct, IComparable<T>
         {
             SignalPlotConst<T> plottable = new SignalPlotConst<T>()
             {
@@ -640,7 +650,7 @@ namespace ScottPlot
         /// <summary>
         /// Speed-optimized plot for Ys with unevenly-spaced ascending Xs
         /// </summary>
-        public SignalPlotXY AddSignalXY(double[] xs, double[] ys, Color? color = null, string label = null)
+        public SignalPlotXY AddSignalXY(in PlotData<double> xs, in PlotData<double> ys, Color? color = null, string label = null)
         {
             SignalPlotXY plottable = new SignalPlotXY()
             {
@@ -661,7 +671,18 @@ namespace ScottPlot
         /// Faster than SignalXY but values cannot be modified after loading.
         /// </summary>
         public SignalPlotXYConst<TX, TY> AddSignalXYConst<TX, TY>(TX[] xs, TY[] ys, Color? color = null, string label = null)
-            where TX : struct, IComparable where TY : struct, IComparable
+            where TX : struct, IComparable<TX> where TY : struct, IComparable<TY>
+        {
+            return AddSignalXYConstData<TX, TY>(xs, ys, color, label);
+        }
+
+
+        /// <summary>
+        /// Speed-optimized plot for Ys with unevenly-spaced ascending Xs.
+        /// Faster than SignalXY but values cannot be modified after loading.
+        /// </summary>
+        public SignalPlotXYConst<TX, TY> AddSignalXYConstData<TX, TY>(PlotData<TX> xs, PlotData<TY> ys, Color? color = null, string label = null)
+            where TX : struct, IComparable<TX> where TY : struct, IComparable<TY>
         {
             SignalPlotXYConst<TX, TY> signal = new SignalPlotXYConst<TX, TY>()
             {
@@ -712,9 +733,9 @@ namespace ScottPlot
         /// Add a 2D vector field to the plot
         /// </summary>
         public VectorField AddVectorField(
-            Vector2[,] vectors,
-            double[] xs,
-            double[] ys,
+            in PlotData2<Vector2> vectors,
+            in PlotData<double> xs,
+            in PlotData<double> ys,
             string label = null,
             Color? color = null,
             Drawing.Colormap colormap = null,

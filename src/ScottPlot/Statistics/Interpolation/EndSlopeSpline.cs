@@ -12,7 +12,7 @@ namespace ScottPlot.Statistics.Interpolation
     /// </summary>
     public class EndSlopeSpline : SplineInterpolator
     {
-        public EndSlopeSpline(double[] xs, double[] ys,
+        public EndSlopeSpline(in PlotData<double> xs, in PlotData<double> ys,
             int resolution = 10, double firstSlopeDegrees = 0, double lastSlopeDegrees = 0) :
             base(xs, ys, resolution)
         {

@@ -16,10 +16,15 @@ namespace ScottPlot.Plottable
     public class ScatterPlot : IPlottable, IHasPoints
     {
         // data
-        public double[] Xs { get; private set; }
-        public double[] Ys { get; private set; }
-        public double[] XError { get; set; }
-        public double[] YError { get; set; }
+
+        private PlotData<double> xs;
+        private PlotData<double> ys;
+        // Get around the MS compiler giving a compile error on indexer assignment of a property value,
+        // e.g. it prevents you from calling instance.property[index] = value; even if this doesn't change property
+        public ref readonly PlotData<double> Xs => ref xs;
+        public ref readonly PlotData<double> Ys => ref ys;
+        public PlotData<double> XError;
+        public PlotData<double> YError;
 
         public int PointCount => Ys.Length;
 
@@ -44,10 +49,10 @@ namespace ScottPlot.Plottable
         public int? MinRenderIndex { set { throw new NotImplementedException(); } }
         public int? MaxRenderIndex { set { throw new NotImplementedException(); } }
 
-        public ScatterPlot(double[] xs, double[] ys, double[] errorX = null, double[] errorY = null)
+        public ScatterPlot(in PlotData<double> xs, in PlotData<double> ys, in PlotData<double> errorX = default, in PlotData<double> errorY = default)
         {
-            Xs = xs;
-            Ys = ys;
+            this.xs = xs;
+            this.ys = ys;
             XError = errorX;
             YError = errorY;
         }
@@ -55,43 +60,35 @@ namespace ScottPlot.Plottable
         /// <summary>
         /// Replace the Xs array with a new one
         /// </summary>
-        public void UpdateX(double[] xs)
+        public void UpdateX(in PlotData<double> xs)
         {
-            if (xs is null)
-                throw new ArgumentException("xs must not be null");
             if (xs.Length != Ys.Length)
                 throw new ArgumentException("xs and ys must have the same length");
 
-            Xs = xs;
+            this.xs = xs;
         }
 
         /// <summary>
         /// Replace the Ys array with a new one
         /// </summary>
-        public void UpdateY(double[] ys)
+        public void UpdateY(in PlotData<double> ys)
         {
-            if (ys is null)
-                throw new ArgumentException("ys must not be null");
             if (Xs.Length != ys.Length)
                 throw new ArgumentException("xs and ys must have the same length");
 
-            Ys = ys;
+            this.ys = ys;
         }
 
         /// <summary>
         /// Replace Xs and Ys arrays with new ones
         /// </summary>
-        public void Update(double[] xs, double[] ys)
+        public void Update(in PlotData<double> xs, in PlotData<double> ys)
         {
-            if (xs is null)
-                throw new ArgumentException("xs must not be null");
-            if (ys is null)
-                throw new ArgumentException("ys must not be null");
             if (xs.Length != ys.Length)
                 throw new ArgumentException("xs and ys must have the same length");
 
-            Xs = xs;
-            Ys = ys;
+            this.xs = xs;
+            this.ys = ys;
         }
 
         public void ValidateData(bool deep = false)
@@ -100,13 +97,13 @@ namespace ScottPlot.Plottable
             Validate.AssertHasElements("ys", Ys);
             Validate.AssertEqualLength("xs and ys", Xs, Ys);
 
-            if (XError != null)
+            if (!XError.IsEmpty)
             {
                 Validate.AssertHasElements("errorX", Xs);
                 Validate.AssertEqualLength("xs and errorX", Xs, XError);
             }
 
-            if (YError != null)
+            if (!YError.IsEmpty)
             {
                 Validate.AssertHasElements("errorY", Ys);
                 Validate.AssertEqualLength("ys and errorY", Ys, YError);
@@ -117,10 +114,10 @@ namespace ScottPlot.Plottable
                 Validate.AssertAllReal("xs", Xs);
                 Validate.AssertAllReal("ys", Ys);
 
-                if (XError != null)
+                if (!XError.IsEmpty)
                     Validate.AssertAllReal("errorX", XError);
 
-                if (YError != null)
+                if (!YError.IsEmpty)
                     Validate.AssertAllReal("errorY", YError);
             }
         }
@@ -138,7 +135,7 @@ namespace ScottPlot.Plottable
             // TODO: don't use an array for this
             double[] limits = new double[4];
 
-            if (XError == null)
+            if (XError.IsEmpty)
             {
                 limits[0] = Xs.Min();
                 limits[1] = Xs.Max();
@@ -156,7 +153,7 @@ namespace ScottPlot.Plottable
                 }
             }
 
-            if (YError == null)
+            if (YError.IsEmpty)
             {
                 limits[2] = Ys.Min();
                 limits[3] = Ys.Max();
@@ -206,7 +203,7 @@ namespace ScottPlot.Plottable
                     points[i] = new PointF(x, y);
                 }
 
-                if (YError != null)
+                if (!YError.IsEmpty)
                 {
                     for (int i = 0; i < points.Count(); i++)
                     {
@@ -218,7 +215,7 @@ namespace ScottPlot.Plottable
                     }
                 }
 
-                if (XError != null)
+                if (!XError.IsEmpty)
                 {
                     for (int i = 0; i < points.Length; i++)
                     {

@@ -11,7 +11,7 @@ using System.Text;
 
 namespace ScottPlot.Plottable
 {
-    public abstract class SignalPlotBase<T> : IPlottable, IHasPoints where T : struct, IComparable
+    public abstract class SignalPlotBase<T> : IPlottable, IHasPoints where T : struct, IComparable<T>
     {
         protected IMinMaxSearchStrategy<T> Strategy = new SegmentedTreeMinMaxSearchStrategy<T>();
         protected bool MaxRenderIndexLowerYSPromise = false;
@@ -34,15 +34,12 @@ namespace ScottPlot.Plottable
         public Color? GradientFillColor2 { get; set; } = null;
         private bool ShowMarkers { get; set; } = false; // this gets set in the render loop
 
-        protected T[] _Ys;
-        public virtual T[] Ys
+        protected PlotData<T> _Ys;
+        public virtual PlotData<T> Ys
         {
             get => _Ys;
             set
             {
-                if (value == null)
-                    throw new Exception("Y data cannot be null");
-
                 MaxRenderIndexLowerYSPromise = MaxRenderIndex > value.Length - 1;
 
                 _Ys = value;
@@ -179,7 +176,7 @@ namespace ScottPlot.Plottable
         /// <param name="lastIndex">last index to replace</param>
         /// <param name="newData">source for new data</param>
         /// <param name="fromData">source data offset</param>
-        public void Update(int firstIndex, int lastIndex, T[] newData, int fromData = 0) =>
+        public void Update(int firstIndex, int lastIndex, in PlotData<T> newData, int fromData = 0) =>
             Strategy.updateRange(firstIndex, lastIndex, newData, fromData);
 
         /// <summary>
@@ -187,13 +184,13 @@ namespace ScottPlot.Plottable
         /// </summary>
         /// <param name="firstIndex">first index to begin replacing</param>
         /// <param name="newData">new values</param>
-        public void Update(int firstIndex, T[] newData) => Update(firstIndex, newData.Length, newData);
+        public void Update(int firstIndex, in PlotData<T> newData) => Update(firstIndex, newData.Length, newData);
 
         /// <summary>
         /// Replace all Y values with new ones
         /// </summary>
         /// <param name="newData">new Y values</param>
-        public void Update(T[] newData) => Update(0, newData.Length, newData);
+        public void Update(in PlotData<T> newData) => Update(0, newData.Length, newData);
 
         public virtual AxisLimits GetAxisLimits()
         {
@@ -538,7 +535,7 @@ namespace ScottPlot.Plottable
 
                     var indexes = Enumerable.Range(0, DensityLevelCount + 1).Select(x => x * (index2 - index1 - 1) / (DensityLevelCount));
 
-                    var levelsValues = new ArraySegment<T>(_Ys, index1, index2 - index1)
+                    var levelsValues = _Ys.Slice(index1, index2 - index1)
                         .OrderBy(x => x)
                         .Where((y, i) => indexes.Contains(i)).ToArray();
                     return (xPx, levelsValues);
@@ -657,8 +654,6 @@ namespace ScottPlot.Plottable
         public void ValidateData(bool deep = false)
         {
             // check Y values
-            if (Ys is null)
-                throw new InvalidOperationException("ys cannot be null");
             if (deep)
                 Validate.AssertAllReal("ys", Ys);
 

@@ -2,8 +2,8 @@
 {
     public class LinearDoubleOnlyMinMaxStrategy : IMinMaxSearchStrategy<double>
     {
-        double[] sourceArray;
-        public double[] SourceArray
+        PlotData<double> sourceArray;
+        public PlotData<double> SourceArray
         {
             get => sourceArray;
             set => sourceArray = value;
@@ -32,7 +32,7 @@
             sourceArray[index] = newValue;
         }
 
-        public void updateRange(int from, int to, double[] newData, int fromData = 0)
+        public void updateRange(int from, int to, PlotData<double> newData, int fromData = 0)
         {
             for (int i = from; i < to; i++)
             {

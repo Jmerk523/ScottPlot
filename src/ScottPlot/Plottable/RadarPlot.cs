@@ -13,7 +13,7 @@ namespace ScottPlot.Plottable
     /// </summary>
     public class RadarPlot : IPlottable
     {
-        private readonly double[,] Norm;
+        private readonly PlotData2<double> Norm;
         private readonly double NormMax;
         private readonly double[] NormMaxes;
         public string[] CategoryLabels;
@@ -29,14 +29,14 @@ namespace ScottPlot.Plottable
         public bool ShowAxisValues { get; set; } = true;
         public RadarAxis AxisType { get; set; } = RadarAxis.Circle;
 
-        public RadarPlot(double[,] values, Color[] lineColors, Color[] fillColors, bool independentAxes, double[] maxValues = null)
+        public RadarPlot(in PlotData2<double> values, Color[] lineColors, Color[] fillColors, bool independentAxes, double[] maxValues = null)
         {
             this.LineColors = lineColors;
             this.FillColors = fillColors;
             this.IndependentAxes = independentAxes;
 
-            Norm = new double[values.GetLength(0), values.GetLength(1)];
-            Array.Copy(values, 0, Norm, 0, values.Length);
+            Norm = new double[values.Rows, values.Columns];
+            values.Data.CopyTo((Memory<double>)Norm);
             if (independentAxes)
             {
                 NormMaxes = NormalizeSeveralInPlace(Norm, maxValues);
@@ -48,14 +48,14 @@ namespace ScottPlot.Plottable
         }
 
         public override string ToString() =>
-            $"PlottableRadar with {PointCount} points and {Norm.GetUpperBound(1) + 1} categories.";
+            $"PlottableRadar with {PointCount} points and {Norm.Columns} categories.";
 
         public void ValidateData(bool deep = false)
         {
-            if (GroupLabels != null && GroupLabels.Length != Norm.GetLength(0))
+            if (GroupLabels != null && GroupLabels.Length != Norm.Rows)
                 throw new InvalidOperationException("group names must match size of values");
 
-            if (CategoryLabels != null && CategoryLabels.Length != Norm.GetLength(1))
+            if (CategoryLabels != null && CategoryLabels.Length != Norm.Columns)
                 throw new InvalidOperationException("category names must match size of values");
         }
 
@@ -63,7 +63,7 @@ namespace ScottPlot.Plottable
         /// Normalize a 2D array by dividing all values by the maximum value.
         /// </summary>
         /// <returns>maximum value in the array before normalization</returns>
-        private double NormalizeInPlace(double[,] input, double[] maxValues = null)
+        private double NormalizeInPlace(in PlotData2<double> input, double[] maxValues = null)
         {
             double max;
             if (maxValues != null && maxValues.Length == 1)
@@ -73,13 +73,13 @@ namespace ScottPlot.Plottable
             else
             {
                 max = input[0, 0];
-                for (int i = 0; i < input.GetLength(0); i++)
-                    for (int j = 0; j < input.GetLength(1); j++)
+                for (int i = 0; i < input.Rows; i++)
+                    for (int j = 0; j < input.Columns; j++)
                         max = Math.Max(max, input[i, j]);
             }
 
-            for (int i = 0; i < input.GetLength(0); i++)
-                for (int j = 0; j < input.GetLength(1); j++)
+            for (int i = 0; i < input.Rows; i++)
+                for (int j = 0; j < input.Columns; j++)
                     input[i, j] /= max;
 
             return max;
@@ -89,20 +89,20 @@ namespace ScottPlot.Plottable
         /// Normalize each row of a 2D array independently by dividing all values by the maximum value.
         /// </summary>
         /// <returns>maximum value in each row of the array before normalization</returns>
-        private double[] NormalizeSeveralInPlace(double[,] input, double[] maxValues = null)
+        private double[] NormalizeSeveralInPlace(in PlotData2<double> input, double[] maxValues = null)
         {
             double[] maxes;
-            if (maxValues != null && input.GetLength(1) == maxValues.Length)
+            if (maxValues != null && input.Columns == maxValues.Length)
             {
                 maxes = maxValues;
             }
             else
             {
-                maxes = new double[input.GetLength(1)];
-                for (int i = 0; i < input.GetLength(1); i++)
+                maxes = new double[input.Columns];
+                for (int i = 0; i < input.Columns; i++)
                 {
                     double max = input[0, i];
-                    for (int j = 0; j < input.GetLength(0); j++)
+                    for (int j = 0; j < input.Rows; j++)
                     {
                         max = Math.Max(input[j, i], max);
                     }
@@ -110,9 +110,9 @@ namespace ScottPlot.Plottable
                 }
             }
 
-            for (int i = 0; i < input.GetLength(0); i++)
+            for (int i = 0; i < input.Rows; i++)
             {
-                for (int j = 0; j < input.GetLength(1); j++)
+                for (int j = 0; j < input.Columns; j++)
                 {
                     input[i, j] /= maxes[j];
                 }
@@ -149,8 +149,8 @@ namespace ScottPlot.Plottable
 
         public void Render(PlotDimensions dims, Bitmap bmp, bool lowQuality = false)
         {
-            int numGroups = Norm.GetUpperBound(0) + 1;
-            int numCategories = Norm.GetUpperBound(1) + 1;
+            int numGroups = Norm.Rows;
+            int numCategories = Norm.Columns;
             double sweepAngle = 2 * Math.PI / numCategories;
             double minScale = new double[] { dims.PxPerUnitX, dims.PxPerUnitX }.Min();
             PointF origin = new PointF(dims.GetPixelX(0), dims.GetPixelY(0));

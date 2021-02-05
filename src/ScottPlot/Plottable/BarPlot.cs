@@ -13,11 +13,11 @@ namespace ScottPlot.Plottable
     public class BarPlot : IPlottable
     {
         // data
-        public double[] Xs;
+        public PlotData<double> Xs;
         public double XOffset;
-        public double[] Ys;
-        public double[] YErrors;
-        public double[] YOffsets;
+        public PlotData<double> Ys;
+        public PlotData<double> YErrors;
+        public PlotData<double> YOffsets;
 
         // customization
         public bool IsVisible { get; set; } = true;
@@ -46,13 +46,13 @@ namespace ScottPlot.Plottable
         public bool HorizontalOrientation { get => !VerticalOrientation; set => VerticalOrientation = !value; }
         public bool ShowValuesAboveBars;
 
-        public BarPlot(double[] xs, double[] ys, double[] yErr, double[] yOffsets)
+        public BarPlot(in PlotData<double> xs, in PlotData<double> ys, in PlotData<double>? yErr = null, in PlotData<double>? yOffsets = null)
         {
-            if (ys is null || ys.Length == 0)
-                throw new InvalidOperationException("ys must be an array that contains elements");
+            if (ys.Length == 0)
+                throw new InvalidOperationException("ys must contains elements");
 
             Ys = ys;
-            Xs = xs ?? DataGen.Consecutive(ys.Length);
+            Xs = xs.Length == 0 ? DataGen.Consecutive(ys.Length) : xs;
             YErrors = yErr ?? DataGen.Zeros(ys.Length);
             YOffsets = yOffsets ?? DataGen.Zeros(ys.Length);
         }
@@ -218,7 +218,7 @@ namespace ScottPlot.Plottable
             return $"PlottableBar{label} with {PointCount} points";
         }
 
-        public int PointCount { get => Ys is null ? 0 : Ys.Length; }
+        public int PointCount { get => Ys.Length; }
 
         public LegendItem[] GetLegendItems()
         {

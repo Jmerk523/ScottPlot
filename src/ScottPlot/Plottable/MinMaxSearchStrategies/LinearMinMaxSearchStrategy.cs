@@ -3,10 +3,10 @@ using System.Linq.Expressions;
 
 namespace ScottPlot.MinMaxSearchStrategies
 {
-    public class LinearMinMaxSearchStrategy<T> : IMinMaxSearchStrategy<T> where T : struct, IComparable
+    public class LinearMinMaxSearchStrategy<T> : IMinMaxSearchStrategy<T> where T : struct, IComparable<T>
     {
-        private T[] sourceArray;
-        public virtual T[] SourceArray
+        private PlotData<T> sourceArray;
+        public virtual PlotData<T> SourceArray
         {
             get => sourceArray;
             set => sourceArray = value;
@@ -57,7 +57,7 @@ namespace ScottPlot.MinMaxSearchStrategies
             sourceArray[index] = newValue;
         }
 
-        public void updateRange(int from, int to, T[] newData, int fromData = 0)
+        public void updateRange(int from, int to, PlotData<T> newData, int fromData = 0)
         {
             for (int i = from; i < to; i++)
             {
