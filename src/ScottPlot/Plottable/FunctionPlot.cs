@@ -25,6 +25,7 @@ namespace ScottPlot.Plottable
         public LineStyle LineStyle = LineStyle.Solid;
         public string Label;
         public Color Color = Color.Black;
+        public Func<PlotData<double>, PlotData<double>, IPlottable> PlotFactory { get; set; }
 
         public FunctionPlot(Func<double, double?> function)
         {
@@ -57,13 +58,9 @@ namespace ScottPlot.Plottable
             var pointCount = (int)Math.Ceiling(dims.DataWidth);
             PointCount = pointCount;
 
-            var xArr = ArrayPool<double>.Shared.Rent(pointCount);
-            var yArr = ArrayPool<double>.Shared.Rent(pointCount);
-
-            try
+            using (PlotData<double>.FromArrayPool(pointCount, out var xList))
+            using (PlotData<double>.FromArrayPool(pointCount, out var yList))
             {
-                PlotData<double> xList = xArr.AsMemory(0, pointCount);
-                PlotData<double> yList = yArr.AsMemory(0, pointCount);
                 for (int columnIndex = 0; columnIndex < dims.DataWidth; columnIndex++)
                 {
                     double x = columnIndex * dims.UnitsPerPxX + dims.XMin;
@@ -87,23 +84,23 @@ namespace ScottPlot.Plottable
                     }
                 }
 
-                // create a temporary scatter plot and use it for rendering
-                var scatter = new ScatterPlot(xList, yList)
-                {
-                    Color = Color,
-                    LineWidth = LineWidth,
-                    MarkerSize = 0,
-                    Label = Label,
-                    MarkerShape = MarkerShape.none,
-                    LineStyle = LineStyle
-                };
-                scatter.Render(dims, bmp, lowQuality);
+                // create a temporary plot and use it for rendering
+                var tempPlot = PlotFactory?.Invoke(xList, yList) ?? DefaultPlotFactory(xList, yList);
+                tempPlot.Render(dims, bmp, lowQuality);
             }
-            finally
+        }
+
+        private ScatterPlot DefaultPlotFactory(PlotData<double> xs, PlotData<double> ys)
+        {
+            return new ScatterPlot(xs, ys)
             {
-                ArrayPool<double>.Shared.Return(xArr);
-                ArrayPool<double>.Shared.Return(yArr);
-            }
+                Color = Color,
+                LineWidth = LineWidth,
+                MarkerSize = 0,
+                Label = Label,
+                MarkerShape = MarkerShape.none,
+                LineStyle = LineStyle
+            };
         }
 
         public void ValidateData(bool deepValidation = false)

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ScottPlot
@@ -31,8 +32,53 @@ namespace ScottPlot
         }
     }
 
+    // Copied from System.Reactive
+    internal sealed class AnonymousDisposable : IDisposable
+    {
+        private volatile Action _dispose;
+
+        public AnonymousDisposable(Action dispose)
+        {
+            _dispose = dispose;
+        }
+
+        public void Dispose()
+        {
+            Interlocked.Exchange(ref _dispose, null)?.Invoke();
+        }
+    }
+
+    internal sealed class AnonymousDisposable<T> : IDisposable
+    {
+        private volatile Action<T> _dispose;
+        private T _state;
+
+        public AnonymousDisposable(T state, Action<T> dispose)
+        {
+            _dispose = dispose;
+            _state = state;
+        }
+
+        public void Dispose()
+        {
+            var disposal = Interlocked.Exchange(ref _dispose, null);
+            if (disposal != null)
+            {
+                disposal(_state);
+                _state = default;
+            }
+        }
+    }
+
     public readonly struct PlotData<T> : IReadOnlyCollection<T>
     {
+        public static IDisposable FromArrayPool(int count, out PlotData<T> data, bool clearWhenDisposed = true)
+        {
+            var array = ArrayPool<T>.Shared.Rent(count);
+            data = array.AsMemory().Slice(0, count);
+            return new AnonymousDisposable<T[]>(array, a => ArrayPool<T>.Shared.Return(a, clearWhenDisposed));
+        }
+
         private readonly ReadOnlyMemory<T> memory;
 
         public bool IsReadOnly
