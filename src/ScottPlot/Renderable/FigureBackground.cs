@@ -10,9 +10,12 @@ namespace ScottPlot.Renderable
 
         public void Render(PlotDimensions dims, Bitmap bmp, bool lowQuality = false)
         {
-            using (var gfx = GDI.Graphics(bmp, lowQuality: true))
+            if (IsVisible)
             {
-                gfx.Clear(Color);
+                using (var gfx = GDI.Graphics(bmp, lowQuality: true))
+                {
+                    gfx.Clear(Color);
+                }
             }
         }
     }
