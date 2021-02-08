@@ -7,6 +7,7 @@ namespace ScottPlot.Renderable
     {
         public Color Color { get; set; } = Color.White;
         public bool IsVisible { get; set; } = true;
+        public bool Blend { get; set; } = false;
 
         public void Render(PlotDimensions dims, Bitmap bmp, bool lowQuality = false)
         {
@@ -14,7 +15,17 @@ namespace ScottPlot.Renderable
             {
                 using (var gfx = GDI.Graphics(bmp, lowQuality: true))
                 {
-                    gfx.Clear(Color);
+                    if (Blend)
+                    {
+                        using (var fill = new SolidBrush(Color))
+                        {
+                            gfx.FillRegion(fill, gfx.Clip);
+                        }
+                    }
+                    else
+                    {
+                        gfx.Clear(Color);
+                    }
                 }
             }
         }
