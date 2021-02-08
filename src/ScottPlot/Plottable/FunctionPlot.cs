@@ -54,7 +54,7 @@ namespace ScottPlot.Plottable
 
         public void Render(PlotDimensions dims, Bitmap bmp, bool lowQuality = false)
         {
-            var pointCount = (int)dims.DataWidth;
+            var pointCount = (int)Math.Ceiling(dims.DataWidth);
             PointCount = pointCount;
 
             var xArr = ArrayPool<double>.Shared.Rent(pointCount);
