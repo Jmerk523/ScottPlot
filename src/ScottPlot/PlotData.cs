@@ -22,13 +22,23 @@ namespace ScottPlot
         public static int BinarySearch<T>(this in PlotData<T> data, int start, T item)
             where T : IComparable<T>
         {
-            return data.Data.Span.Slice(start).BinarySearch(item) + start;
+            var index = data.Data.Span.Slice(start).BinarySearch(item);
+            if (index >= 0)
+            {
+                index += start;
+            }
+            return index;
         }
 
         public static int BinarySearch<T>(this in PlotData<T> data, int start, int length, T item)
             where T : IComparable<T>
         {
-            return data.Data.Span.Slice(start, length).BinarySearch(item) + start;
+            var index = data.Data.Span.Slice(start, length).BinarySearch(item);
+            if (index >= 0)
+            {
+                index += start;
+            }
+            return index;
         }
     }
 
